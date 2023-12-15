@@ -1,0 +1,10 @@
+cmake-build-debug
+CMakeLists.txt
+.idea
+build
+cpp_test
+*.o
+*.debug
+*.d
+a.out
+debug.a.out
