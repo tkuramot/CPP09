@@ -2,11 +2,11 @@ CXX			:= c++
 CXXFLAGS	:= -g -MMD -MP -Wall -Wextra -Werror -Wconversion -std=c++98
 DEBUG_FLAGS		:= -fsanitize=address -fsanitize=bounds
 INCLUDE		:= -I include
-NAME		:= a.out
-NAME_DEBUG	:= debug.a.out
+NAME		:= btc
+NAME_DEBUG	:= debug.btc
 SRCDIR		:= src
 SRCS		:= \
-	src/ScalarConverter.cpp \
+	src/BitcoinExchange.cpp \
 	src/main.cpp
 OBJDIR		:= objs
 OBJS		:= $(subst $(SRCDIR), $(OBJDIR), $(SRCS:.cpp=.o))
