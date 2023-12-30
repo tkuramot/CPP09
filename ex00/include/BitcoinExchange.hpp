@@ -15,11 +15,17 @@ public:
   ~BitcoinExchange();
   BitcoinExchange &operator=(const BitcoinExchange &other);
 
-  void ReadExchangeRateDatabase() throw(std::runtime_error);
+  BitcoinExchange(std::string file_name);
+  void ProcessInput(std::string &file_name);
 
 private:
   std::map<std::string, double> rates_;
-  static const std::string kDatabaseFile;
+  std::map<std::string, std::string> input_db_;
+  void
+  ReadBitcoinPriceDatabase(std::string &file_name) throw(std::runtime_error);
+  void ReadInputDatabase(std::string &file_name);
+  bool IsValidDate(const std::string &date);
+  bool IsValidValue(const std::string &value);
 };
 
 #endif // CPP09_EX00_BITCOINEXCHANGE_HPP_
