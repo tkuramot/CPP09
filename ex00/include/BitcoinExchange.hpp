@@ -20,7 +20,6 @@ public:
 
 private:
   std::map<std::string, double> rates_;
-  std::map<std::string, std::string> input_db_;
   void
   ReadBitcoinPriceDatabase(std::string &file_name) throw(std::runtime_error);
   void ReadInputDatabase(std::string &file_name);

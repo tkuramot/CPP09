@@ -43,33 +43,21 @@ void BitcoinExchange::ReadBitcoinPriceDatabase(std::string &file_name) throw(
   std::string time;
   double rate;
   while (std::getline(exchange_rate_csv, buffer)) {
-    size_t pos = buffer.find(',');
+    // 区切り文字を空白に置き換える
+    std::string delimiter = ",";
+    size_t pos = buffer.find(delimiter);
     if (pos != std::string::npos) {
-      buffer.replace(pos, 1, " ");
+      buffer.replace(pos, delimiter.size(), " ");
     }
+
     std::stringstream row(buffer);
-    if (!(row >> time >> rate)) {
-      throw std::runtime_error("Failed to parse a line in database");
-    }
+    row.exceptions(std::stringstream::failbit);
+    row >> time >> rate;
     rates_[time] = rate;
   }
 }
 
 void BitcoinExchange::ProcessInput(std::string &file_name) {
-  ReadInputDatabase(file_name);
-
-  for (std::map<std::string, std::string>::iterator itr = input_db_.begin();
-       itr != input_db_.end(); ++itr) {
-    if (!IsValidDate(itr->first)) {
-      continue;
-    }
-    if (!IsValidValue(itr->second)) {
-      continue;
-    }
-  }
-}
-
-void BitcoinExchange::ReadInputDatabase(std::string &file_name) {
   std::ifstream exchange_rate_csv(file_name);
   if (!exchange_rate_csv.is_open()) {
     throw std::runtime_error("Error: could not open file.");
@@ -84,20 +72,30 @@ void BitcoinExchange::ReadInputDatabase(std::string &file_name) {
 
   std::string time, value;
   while (std::getline(exchange_rate_csv, buffer)) {
-    size_t pos = buffer.find(" | ");
+    // 区切り文字を空白に置き換える
+    std::string delimiter = " | ";
+    size_t pos = buffer.find(delimiter);
     if (pos != std::string::npos) {
-      buffer.replace(pos, 1, " ");
+      buffer.replace(pos, delimiter.size(), " ");
     }
+
     std::stringstream row(buffer);
-    if (!(row >> time >> value)) {
-      throw std::runtime_error("Error: invalid data format.");
+    if (!IsValidDate(time)) {
+      continue;
     }
-    input_db_[time] = value;
+    if (!IsValidValue(value)) {
+      continue;
+    }
+    // process
   }
 }
 
-bool BitcoinExchange::IsValidDate(const std::string &data) {
+bool BitcoinExchange::IsValidDate(const std::string &date) {
+  (void)date;
+  return true;
 }
 
 bool BitcoinExchange::IsValidValue(const std::string &value) {
+  (void)value;
+  return true;
 }
