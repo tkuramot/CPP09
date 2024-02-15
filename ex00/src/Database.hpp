@@ -10,12 +10,12 @@
 #include <sstream>
 #include <string>
 
-class BitcoinDatabase {
-  BitcoinDatabase(const BitcoinDatabase &other);
-  BitcoinDatabase &operator=(const BitcoinDatabase &other);
-  ~BitcoinDatabase();
+class Database {
+  Database(const Database &other);
+  Database &operator=(const Database &other);
+  ~Database();
 
-  BitcoinDatabase(const std::string &file_name);
+  Database(const std::string &file_name);
 
   void LoadDatabase();
   template <typename F> void IterateOverRows(F func);
@@ -27,11 +27,11 @@ private:
   const static int kMaxValue = 1000;
 
   // ファイル名の指定なしでインスタンス化する意味はないのでprivateにする
-  BitcoinDatabase();
+  Database();
   static bool IsValidDateFormat(std::string &date);
 };
 
-template <typename F> void BitcoinDatabase::IterateOverRows(F func) {
+template <typename F> void Database::IterateOverRows(F func) {
   std::ifstream db_file(file_name_);
 
   // ヘッダは飛ばした上で、各行を読む
