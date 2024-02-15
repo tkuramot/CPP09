@@ -1,7 +1,7 @@
 CXX			:= c++
 CXXFLAGS	:= -g -MMD -MP -Wall -Wextra -Werror -Wconversion -std=c++98
 DEBUG_FLAGS		:= -fsanitize=address -fsanitize=bounds
-INCLUDE		:= -I include
+INCLUDE		:= -I $(SRCDIR)
 NAME		:= btc
 NAME_DEBUG	:= debug.btc
 SRCDIR		:= src

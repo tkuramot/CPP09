@@ -1,0 +1,10 @@
+//
+// Created by k.t. on 2024/02/15.
+//
+
+#ifndef BTC_EX00_INCLUDE_BITCOINEXCHANGE_HPP_
+#define BTC_EX00_INCLUDE_BITCOINEXCHANGE_HPP_
+
+class BitcoinExchange {};
+
+#endif // BTC_EX00_INCLUDE_BITCOINEXCHANGE_HPP_

@@ -2,12 +2,11 @@ CXX			:= c++
 CXXFLAGS	:= -g -MMD -MP -Wall -Wextra -Werror -Wconversion -std=c++98
 DEBUG_FLAGS		:= -fsanitize=address -fsanitize=bounds
 INCLUDE		:= -I include
-NAME		:= a.out
-NAME_DEBUG	:= debug.a.out
+NAME		:= RPN
+NAME_DEBUG	:= debug.RPN
 SRCDIR		:= src
 SRCS		:= \
-	src/main.cpp \
-	src/Span.cpp
+	src/main.cpp
 OBJDIR		:= objs
 OBJS		:= $(subst $(SRCDIR), $(OBJDIR), $(SRCS:.cpp=.o))
 OBJS_DEBUG	:= $(subst $(SRCDIR), $(OBJDIR), $(SRCS:.cpp=.o.debug))
