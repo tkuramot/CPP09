@@ -1,79 +1,57 @@
-//
-// Created by k.t. on 2024/02/16.
-//
+#pragma once
 
-#ifndef BTC_EX00_SRC_RESULT_HPP_
-#define BTC_EX00_SRC_RESULT_HPP_
-
-#include <cassert>
+#include "Error.hpp"
+#include "Value.hpp"
+#include <stdexcept>
 
 template <typename T, typename E> class Result {
 public:
-  explicit Result(T ok);
-  explicit Result(E err);
-  Result(const Result &other);
-  ~Result();
+  Result(T value, E error, bool has_value)
+      : value_(value), error_(error), has_value_(has_value) {}
 
-  bool IsOk() const;
-  bool IsError() const;
-  const T &Ok() const;
-  const E &Error() const;
+  Result(const Result &other)
+      : value_(other.value_), error_(other.error_),
+        has_value_(other.has_value_) {}
+
+  Result &operator=(const Result &other) {
+    if (this == &other) {
+      return *this;
+    }
+    value_ = other.value_;
+    error_ = other.error_;
+    has_value_ = other.has_value_;
+  }
+
+  ~Result() {}
+
+  T Unwrap() const {
+    if (!IsOk()) {
+      throw std::runtime_error("Result does not have a value");
+    }
+    return value_;
+  }
+
+  E UnwrapErr() const {
+    if (!IsErr()) {
+      throw std::runtime_error("Result does not have an error");
+    }
+    return error_;
+  }
+
+  bool IsOk() const { return has_value_; }
+
+  bool IsErr() const { return !has_value_; }
 
 private:
-  enum Tag {
-    kOk,
-    kError,
-  };
-  Tag tag_;
-  T ok_;
-  E err_;
+  T value_;
+  E error_;
+  bool has_value_;
 };
 
-template <typename T, typename E>
-Result<T, E>::Result(T ok) : tag_(kOk), ok_(ok) {}
-
-template <typename T, typename E>
-Result<T, E>::Result(E err) : tag_(kError), err_(err) {}
-
-template <typename T, typename E>
-Result<T, E>::Result(const Result &other) : tag_(other.tag_) {
-  if (tag_ == kOk) {
-    ok_ = other.ok_;
-    return;
-  }
-  if (tag_ == kError) {
-    err_ = other.err_;
-    return;
-  }
+template <typename T> result::Value<T> Ok(T value) {
+  return result::Value<T>(value);
 }
 
-template <typename T, typename E> Result<T, E>::~Result() {
-  if (tag_ == kOk) {
-    ok_.~T();
-    return;
-  }
-  if (tag_ == kError) {
-    err_.~E();
-    return;
-  }
+template <typename E> result::Error<E> Err(E error) {
+  return result::Error<E>(error);
 }
-
-template <typename T, typename E> bool Result<T, E>::IsOk() const {
-  return tag_ == kOk;
-}
-
-template <typename T, typename E> bool Result<T, E>::IsError() const {
-  return tag_ == kError;
-}
-
-template <typename T, typename E> const T &Result<T, E>::Ok() const {
-  assert(tag_ == kOk);
-  return ok_;
-}
-
-template <typename T, typename E> const E &Result<T, E>::Error() const {
-  assert(tag_ == kError);
-  return err_;
-}
-
-#endif // BTC_EX00_SRC_RESULT_HPP_
