@@ -3,8 +3,8 @@
 //
 
 #include "Database.hpp"
+#include "utils.hpp"
 #include <fstream>
-#include <iostream>
 
 Database::Database() {}
 
@@ -12,12 +12,16 @@ Database::Database(const std::string &key_value_delimiter)
     : key_value_delimiter_(key_value_delimiter) {
 }
 
-Database::Database(const Database &other) {
-  (void) other;
+Database::Database(const Database &other)
+    : key_value_delimiter_(other.key_value_delimiter_), data_(other.data_) {
 }
 
 Database &Database::operator=(const Database &other) {
-  (void) other;
+  if (this != &other) {
+    return *this;
+  }
+  key_value_delimiter_ = other.key_value_delimiter_;
+  data_ = other.data_;
   return *this;
 }
 
@@ -38,19 +42,18 @@ bool Database::Load(const std::string &file_path) {
   std::getline(db_file, line);
   // read the key-value pairs
   while (std::getline(db_file, line)) {
-    std::pair<std::string, std::string> key_value = ReadKeyValuePair(line);
+    std::pair<std::string, std::string> key_value = SplitKeyValue(line, key_value_delimiter_);
     data_.insert(key_value);
   }
   return true;
 }
 
-std::pair<std::string, std::string> Database::ReadKeyValuePair(const std::string &line) {
-  size_t delimiter_pos = line.find(key_value_delimiter_);
-  if (delimiter_pos == std::string::npos) {
-    return std::make_pair(line, "");
+// if the key is not found, return lower closest date
+std::string Database::Find(const std::string &key) const {
+  std::map<std::string, std::string>::const_iterator itr = data_.lower_bound(key);
+  if (itr->first == key || itr == data_.begin()) {
+    return itr->second;
   }
-  return std::make_pair(
-      line.substr(0, delimiter_pos),
-      line.substr(delimiter_pos + key_value_delimiter_.length() + 1)
-  );
+  std::advance(itr, -1);
+  return itr->second;
 }

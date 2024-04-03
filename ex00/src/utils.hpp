@@ -13,4 +13,7 @@ Result<int, std::string> StringToInt(const std::string &number);
 
 bool IsValidDateFormat(const std::string &date);
 
+std::pair<std::string, std::string> SplitKeyValue(const std::string &line,
+                                                  const std::string &key_value_delimiter);
+
 #endif //BTC_SRC_UTILS_HPP_

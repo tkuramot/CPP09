@@ -52,3 +52,15 @@ bool IsValidDateFormat(const std::string &date) {
   }
   return true;
 }
+
+std::pair<std::string, std::string> SplitKeyValue(const std::string &line,
+                                                            const std::string &key_value_delimiter) {
+  size_t delimiter_pos = line.find(key_value_delimiter);
+  if (delimiter_pos == std::string::npos) {
+    return std::make_pair(line, "");
+  }
+  return std::make_pair(
+      line.substr(0, delimiter_pos),
+      line.substr(delimiter_pos + key_value_delimiter.length())
+  );
+}

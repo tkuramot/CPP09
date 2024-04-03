@@ -6,6 +6,7 @@
 #define BTC_SRC_BITCOINEXCHANGE_HPP_
 
 #include "Database.hpp"
+#include "Result.hpp"
 
 class BitcoinExchange {
  public:
@@ -19,7 +20,10 @@ class BitcoinExchange {
   void SimulateExchange(const std::string &input_filename);
 
  private:
-  Database exchange_rate_;
+  Database exchange_rate_db_;
+
+  static Result<std::pair<std::string, double>, std::string> ParseSimulationInput(
+      const std::string &line, const std::string &key_value_delimiter);
 };
 
 #endif //BTC_SRC_BITCOINEXCHANGE_HPP_

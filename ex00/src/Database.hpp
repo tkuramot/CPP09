@@ -18,13 +18,13 @@ class Database {
 
   std::map<std::string, std::string> GetData() const;
   bool Load(const std::string &file_path);
+  std::string Find(const std::string &key) const;
 
-  Database();
  private:
-  const std::string key_value_delimiter_;
+  std::string key_value_delimiter_;
   std::map<std::string, std::string> data_;
 
-  std::pair<std::string, std::string> ReadKeyValuePair(const std::string &line);
+  Database();
 };
 
 #endif //BTC_SRC_DATABASE_HPP_
