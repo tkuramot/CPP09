@@ -26,8 +26,8 @@ Result<int, std::string> StringToInt(const std::string &number) {
 }
 
 bool IsValidDateFormat(const std::string &date) {
-  const std::string format = "YYYY-MM-DD";
-  if (date.size() != format.size()) {
+  const std::string kFormat = "YYYY-MM-DD";
+  if (date.size() != kFormat.size()) {
     return false;
   }
 

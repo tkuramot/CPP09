@@ -61,7 +61,7 @@ Result<std::pair<std::string, double>,
 }
 
 void BitcoinExchange::SimulateExchange(const std::string &input_filename) {
-  const std::string key_value_delimiter = " | ";
+  const std::string kKeyValueDelimiter = " | ";
 
   std::ifstream input_file(input_filename.c_str());
   if (!input_file.is_open()) {
@@ -75,7 +75,7 @@ void BitcoinExchange::SimulateExchange(const std::string &input_filename) {
   // read the key-value pairs
   while (std::getline(input_file, line)) {
     Result<std::pair<std::string, double>, std::string>
-        key_value = ParseSimulationInput(line, key_value_delimiter);
+        key_value = ParseSimulationInput(line, kKeyValueDelimiter);
     if (key_value.IsErr()) {
       std::cerr << key_value.UnwrapErr() << std::endl;
       continue;
