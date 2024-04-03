@@ -50,6 +50,10 @@ bool Database::Load(const std::string &file_path) {
 
 // if the key is not found, return lower closest date
 std::string Database::Find(const std::string &key) const {
+  if (data_.empty()) {
+    return "";
+  }
+
   std::map<std::string, std::string>::const_iterator itr = data_.lower_bound(key);
   if (itr->first == key || itr == data_.begin()) {
     return itr->second;
