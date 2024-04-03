@@ -2,8 +2,11 @@
 // Created by k.t. on 2024/02/12.
 //
 
-#include <map>
+#include "BitcoinExchange.hpp"
 
 int main() {
-  std::map<int, int> mp;
+  BitcoinExchange exchange;
+  exchange.LoadExchangeRate("../data.csv");
+  exchange.SimulateExchange("../input.txt");
+  return 0;
 }

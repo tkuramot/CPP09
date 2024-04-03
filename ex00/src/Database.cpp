@@ -1,56 +1,56 @@
 //
-// Created by k.t. on 2024/02/15.
+// Created by tkuramot on 4/3/24.
 //
 
 #include "Database.hpp"
+#include <fstream>
 #include <iostream>
-#include <sstream>
-#include <string>
 
 Database::Database() {}
 
-Database::Database(const std::string &file_name)
-    : file_name_(file_name) {
-  LoadDatabase();
+Database::Database(const std::string &key_value_delimiter)
+    : key_value_delimiter_(key_value_delimiter) {
 }
 
-Database::Database(const Database &other)
-    : file_name_(other.file_name_) {}
+Database::Database(const Database &other) {
+  (void) other;
+}
 
 Database &Database::operator=(const Database &other) {
-  if (this == &other) {
-    return *this;
-  }
-  file_name_ = other.file_name_;
+  (void) other;
   return *this;
 }
 
 Database::~Database() {}
 
-void Database::LoadDatabase() {
+std::map<std::string, std::string> Database::GetData() const {
+  return data_;
 }
 
-std::pair<std::string, double> Database::ReadOneRecord(std::stringstream &row) {
-  // 想定した型の読み込みに失敗した場合、ファイルからの回復不能な読み込みエラーが生じた場合に例外を投げる
-  row.exceptions(std::ios::failbit | std::ios::badbit);
-
-  std::string date;
-  char _;
-  double value;
-  row >> date >> _ >> value;
-
-  // 日付と値の範囲を検証する
-  if (!IsValidDateFormat(date)) {
-    std::cerr << "Error: bad input => " << date << '.' << std::endl;
-  }
-  if (value < 0) {
-    std::cerr << "Error: not a positive number." << std::endl;
-  }
-  if (value > Database::kMaxValue) {
-    std::cerr << "Error: too large a number." << std::endl;
+bool Database::Load(const std::string &file_path) {
+  std::ifstream db_file(file_path.c_str());
+  if (!db_file.is_open()) {
+    return false;
   }
 
-  return std::pair<std::string, double>(date, value);
+  std::string line;
+  // discard the header
+  std::getline(db_file, line);
+  // read the key-value pairs
+  while (std::getline(db_file, line)) {
+    std::pair<std::string, std::string> key_value = ReadKeyValuePair(line);
+    data_.insert(key_value);
+  }
+  return true;
 }
 
-bool Database::IsValidDateFormat(std::string &date) { return true; }
+std::pair<std::string, std::string> Database::ReadKeyValuePair(const std::string &line) {
+  size_t delimiter_pos = line.find(key_value_delimiter_);
+  if (delimiter_pos == std::string::npos) {
+    return std::make_pair(line, "");
+  }
+  return std::make_pair(
+      line.substr(0, delimiter_pos),
+      line.substr(delimiter_pos + key_value_delimiter_.length() + 1)
+  );
+}
