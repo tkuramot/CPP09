@@ -24,7 +24,6 @@ BitcoinExchange::~BitcoinExchange() {}
 
 bool BitcoinExchange::LoadExchangeRate(const std::string &filename) {
   if (!exchange_rate_db_.Load(filename)) {
-    std::cerr << "Failed to open database file: " << filename << std::endl;
     return false;
   }
   return true;

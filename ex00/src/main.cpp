@@ -12,7 +12,10 @@ int main(int argc, char **argv) {
   }
 
   BitcoinExchange exchange;
-  exchange.LoadExchangeRate("data.csv");
+  if (!exchange.LoadExchangeRate("data.csv")) {
+    std::cerr << "Error: failed to load exchange rate data" << std::endl;
+    return 1;
+  }
   exchange.SimulateExchange(argv[1]);
   return 0;
 }
