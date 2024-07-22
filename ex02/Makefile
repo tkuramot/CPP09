@@ -1,7 +1,7 @@
 CXX			:= c++
 CXXFLAGS	:= -g -MMD -MP -Wall -Wextra -Werror -std=c++98
 DEBUG_FLAGS		:= -fsanitize=address -fsanitize=bounds
-INCLUDE		:= -I include
+INCLUDE		:= -I src
 NAME		:= a.out
 NAME_DEBUG	:= debug.a.out
 SRCDIR		:= src
