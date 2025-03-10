@@ -115,6 +115,7 @@ operator-(GroupIterator<Iterator> it1, GroupIterator<Iterator> it2) {
 }
 
 // Swap
+// TODO swap ranges. care for overlapping ranges.
 template <typename Iterator>
 void Swap(GroupIterator<Iterator> &it1, GroupIterator<Iterator> &it2) {
   std::iter_swap(it1.BastIt(), it2.BastIt());
