@@ -1,8 +1,9 @@
-#include <vector>
+#include "Jacobsthal.hpp"
 
 int main() {
-  std::vector<int> v1;
+  Jacobsthal<int> j(10);
   for (int i = 0; i < 10; ++i) {
-    v1.push_back(i);
+    printf("Jacobsthal(%d) = %d\n", i, j[i]);
   }
+  return 0;
 }
