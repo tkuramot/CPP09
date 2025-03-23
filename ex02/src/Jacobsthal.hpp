@@ -5,7 +5,7 @@
 
 template <typename T> class Jacobsthal {
 public:
-  Jacobsthal(int n) { seq_ = Generate(n); }
+  Jacobsthal(int n) { Fill(n); }
   ~Jacobsthal() {}
   const T &operator[](int i) const { return seq_[i]; }
   T &operator[](int i) { return seq_[i]; }
@@ -16,22 +16,21 @@ private:
   Jacobsthal() {}
   Jacobsthal(const Jacobsthal &) {}
   Jacobsthal &operator=(const Jacobsthal &) {}
-  std::vector<T> Generate(int n) {
-    std::vector<T> seq(n);
-    if (seq.size() > 0) {
-      seq[0] = 0;
+  void Fill(int n) {
+    seq_.resize(n);
+    if (seq_.size() > 0) {
+      seq_[0] = 0;
     }
-    if (seq.size() > 1) {
-      seq[1] = 1;
+    if (seq_.size() > 1) {
+      seq_[1] = 1;
     }
 
-    if (seq.size() <= 2) {
-      return seq;
+    if (seq_.size() <= 2) {
+      return;
     }
-    for (size_t i = 2; i < seq.size(); ++i) {
-      seq[i] = seq[i - 1] + 2 * seq[i - 2];
+    for (size_t i = 2; i < seq_.size(); ++i) {
+      seq_[i] = seq_[i - 1] + 2 * seq_[i - 2];
     }
-    return seq;
   }
 };
 

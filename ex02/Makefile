@@ -2,11 +2,10 @@ CXX			:= c++
 CXXFLAGS	:= -g -MMD -MP -Wall -Wextra -Werror -std=c++98
 DEBUG_FLAGS		:= -fsanitize=address -fsanitize=bounds
 INCLUDE		:= -I src
-NAME		:= a.out
-NAME_DEBUG	:= debug.a.out
+NAME		:= PMergeMe
+NAME_DEBUG	:= PMergeMe_debug
 SRCDIR		:= src
-SRCS		:= \
-	src/main.cpp
+SRCS		:= $(wildcard $(SRCDIR)/*.cpp)
 OBJDIR		:= objs
 OBJS		:= $(subst $(SRCDIR), $(OBJDIR), $(SRCS:.cpp=.o))
 OBJS_DEBUG	:= $(subst $(SRCDIR), $(OBJDIR), $(SRCS:.cpp=.o.debug))
@@ -43,8 +42,5 @@ fclean: clean
 
 .PHONY: re
 re: fclean all
-
-cppfile:
-	find src -name "*.cpp" | sed 's/\.\///g' | awk '{print "\t"$$0" \\"}' | sed '$$s/ \\//' | pbcopy
 
 -include $(DEPENDS)
