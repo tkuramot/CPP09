@@ -18,8 +18,8 @@ public:
       : it_(it.Base()), size_(it.Size() * size) {}
 
   // Element access
-  reference operator*() const { return *it_; }
-  pointer operator->() const { return it_; }
+  reference operator*() const { return *std::next(it_, size_ - 1); }
+  pointer operator->() const { return &(operator*()); }
 
   // Increment and decrement operators
   GroupIterator &operator++() {
