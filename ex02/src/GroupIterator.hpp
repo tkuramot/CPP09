@@ -2,6 +2,7 @@
 #define GROUP_ITERATOR_HPP
 
 #include <iterator>
+#include <iostream>
 
 template <typename Iterator> class GroupIterator {
 public:
@@ -69,6 +70,14 @@ public:
   // Accessors
   Iterator Base() const { return it_; }
   difference_type Size() const { return size_; }
+
+  // For debugging only
+  static void DebugPrint(GroupIterator<Iterator> begin, GroupIterator<Iterator> end) {
+    for (GroupIterator<Iterator> it = begin; it != end; ++it) {
+      std::cerr << *it << " ";
+    }
+    std::cerr << std::endl;
+  }
 
 private:
   Iterator it_;
