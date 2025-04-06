@@ -30,5 +30,8 @@ int main() {
   v.push_back(8);
   v.push_back(14);
   PMergeMe::Sort<int>(v);
+  for (size_t i = 0; i < v.size(); ++i) {
+    std::cout << v[i] << " ";
+  }
   return 0;
 }

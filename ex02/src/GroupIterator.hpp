@@ -1,8 +1,8 @@
 #ifndef GROUP_ITERATOR_HPP
 #define GROUP_ITERATOR_HPP
 
-#include <iterator>
 #include <iostream>
+#include <iterator>
 
 template <typename Iterator> class GroupIterator {
 public:
@@ -70,9 +70,15 @@ public:
   // Accessors
   Iterator Base() const { return it_; }
   difference_type Size() const { return size_; }
+  static void Swap(GroupIterator lhs, GroupIterator rhs) {
+    for (difference_type i = 0; i < lhs.size_; ++i) {
+      std::iter_swap(lhs.it_ + i, rhs.it_ + i);
+    }
+  }
 
   // For debugging only
-  static void DebugPrint(GroupIterator<Iterator> begin, GroupIterator<Iterator> end) {
+  static void DebugPrint(GroupIterator<Iterator> begin,
+                         GroupIterator<Iterator> end) {
     for (GroupIterator<Iterator> it = begin; it != end; ++it) {
       std::cerr << *it << " ";
     }

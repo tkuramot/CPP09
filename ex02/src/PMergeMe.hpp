@@ -4,16 +4,18 @@
 #include "GroupIterator.hpp"
 #include <algorithm>
 #include <deque>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 
 #define VERBOSE 1
 
 #ifdef VERBOSE
 #define debug std::cerr
 #else
-#define debug if(false) std::cerr
+#define debug                                                                  \
+  if (false)                                                                   \
+  std::cerr
 #endif
 
 class PMergeMe {
@@ -53,19 +55,19 @@ private:
       if (*it < *(it + 1)) {
         continue;
       }
-      std::iter_swap(it, (it + 1));
+      GroupIterator<RandomAccessIterator>::Swap(it, it + 1);
     }
 
-    std::stringstream large, small;
+    std::stringstream lb, sb;
     for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      large << std::setw(2) << *(it + 1) << " ";
-      small << std::setw(2) << *it << " ";
+      lb << std::setw(2) << *(it + 1) << " ";
+      sb << std::setw(2) << *it << " ";
     }
     if (has_stray) {
-      small << std::setw(2) << *(last - 1) << " ";
+      sb << std::setw(2) << *(last - 1) << " ";
     }
-    debug << "large: " << large.str() << std::endl;
-    debug << "small: " << small.str() << std::endl;
+    debug << "large: " << lb.str() << std::endl;
+    debug << "small: " << sb.str() << std::endl;
 
     // Recursively sort the pairs
     SortImpl<Container>(GroupIterator<RandomAccessIterator>(first, 2),
@@ -76,18 +78,31 @@ private:
                       std::allocator<GroupIterator<RandomAccessIterator> > >
         chain_t;
     chain_t chain;
+    chain.reserve(size);
     debug << "===" << std::endl;
+    debug << "returning from recursion..." << std::endl;
+    std::stringstream la, sa;
+    for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
+      la << std::setw(2) << *(it + 1) << " ";
+      sa << std::setw(2) << *it << " ";
+    }
+    if (has_stray) {
+      sa << std::setw(2) << *(last - 1) << " ";
+    }
+    debug << "large: " << la.str() << std::endl;
+    debug << "small: " << sa.str() << std::endl;
     debug << "separating numbers into chain and pend..." << std::endl;
     debug << "inserting first pend element into chain" << std::endl;
     chain.push_back(first);
     chain.push_back(first + 1);
-    debug << *chain.front() << " " << *chain.back() << std::endl;
     typedef Container<typename chain_t::iterator,
                       std::allocator<typename chain_t::iterator> >
         pend_t;
     pend_t pend;
-    for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      typename chain_t::iterator tmp = chain.insert(chain.end(), it);
+    pend.reserve(size / 2 - 1);
+    for (GroupIterator<RandomAccessIterator> it = first + 2; it != end;
+         it += 2) {
+      typename chain_t::iterator tmp = chain.insert(chain.end(), it + 1);
       pend.emplace_back(tmp);
     }
     if (has_stray) {
@@ -105,12 +120,13 @@ private:
       GroupIterator<RandomAccessIterator> it =
           current_it + group * 2; // Multiply by 2 for pairs
       typename pend_t::iterator pend_it = current_pend + group;
-      debug << "binary search for " << *it << " in first " << it - current_it - 1 << " of chain" << std::endl;
       while (true) {
         --pend_it;
 
         typename chain_t::iterator left = chain.begin();
         typename chain_t::iterator right = *pend_it;
+        debug << "binary search for " << *it << " in first "
+              << it - current_it - 1 << " of chain" << std::endl;
         while (left != right) {
           typename chain_t::iterator mid = left + (right - left) / 2;
           debug << "- comparing " << **mid << " and " << *it << std::endl;
@@ -148,15 +164,17 @@ private:
       ++current_pend;
     }
 
-    // Container<RandomAccessIterator, std::allocator<RandomAccessIterator> > cache;
-    // for (typename chain_t::iterator it = chain.begin(); it != chain.end(); ++it) {
-    //   RandomAccessIterator begin = it->Base();
-    //   RandomAccessIterator end = begin + it->Size();
-    //   for (RandomAccessIterator i = begin; i != end; ++i) {
-    //     cache.push_back(i);
-    //   }
-    // }
-    // std::copy(cache.begin(), cache.end(), first.Base());
+    Container<typename RandomAccessIterator::value_type,
+              std::allocator<typename RandomAccessIterator::value_type> >
+        cache;
+    for (typename chain_t::iterator it = chain.begin(); it != chain.end();
+         ++it) {
+      for (typename RandomAccessIterator::difference_type i = 0; i < it->Size();
+           ++i) {
+        cache.push_back(*(it->Base() + i));
+      }
+    }
+    std::copy(cache.begin(), cache.end(), first.Base());
   }
 };
 
