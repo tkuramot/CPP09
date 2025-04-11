@@ -18,6 +18,8 @@
   std::cerr
 #endif
 
+size_t compare_count_;
+
 class PMergeMe {
 public:
   template <typename T> static void Sort(std::vector<T> &v) {
@@ -51,7 +53,8 @@ private:
     // Sort in pairs
     debug << "pairing numbers and sorting in pairs..." << std::endl;
     for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      debug << "- comparing " << *it << " and " << *(it + 1) << std::endl;
+      debug << "- comparing " << *it << " and " << *(it + 1) << ". compare "
+            << ++compare_count_ << std::endl;
       if (*it < *(it + 1)) {
         continue;
       }
@@ -112,24 +115,28 @@ private:
     // Insert the pend into the chain
     GroupIterator<RandomAccessIterator> current_it = first;
     typename pend_t::iterator current_pend = pend.begin();
-    for (typename GroupIterator<RandomAccessIterator>::difference_type
-             pow2 = 1,
-             jn = 0, group = 2;
-         group <= pend.end() - current_pend;
-         pow2 *= 2, jn = pow2 - jn, group = jn * 2 /* jn*2 is 2^n-1 */) {
+    for (typename chain_t::difference_type pow2 = 1, jn = 0, dist = 2;
+         dist <= pend.end() - current_pend;
+         pow2 *= 2, jn = pow2 - jn, dist = 2 * jn) {
       GroupIterator<RandomAccessIterator> it =
-          current_it + group * 2; // Multiply by 2 for pairs
-      typename pend_t::iterator pend_it = current_pend + group;
+          current_it + dist * 2; // Multiply by 2 for pairs
+      typename pend_t::iterator pend_it = current_pend + dist;
       while (true) {
         --pend_it;
 
         typename chain_t::iterator left = chain.begin();
         typename chain_t::iterator right = *pend_it;
-        debug << "binary search for " << *it << " in first "
-              << it - current_it - 1 << " of chain" << std::endl;
+        debug << "binary search for " << *it << " in " << right - left
+              << " elements" << std::endl;
+        debug << "===============" << chain.size() << std::endl;
+        for (typename chain_t::iterator it = left; it != right; ++it) {
+          debug << **it << " ";
+        }
+        debug << std::endl << "===============" << std::endl;
         while (left != right) {
           typename chain_t::iterator mid = left + (right - left) / 2;
-          debug << "- comparing " << **mid << " and " << *it << std::endl;
+          debug << "- comparing " << **mid << " and " << *it << ". compare "
+                << ++compare_count_ << std::endl;
           if (**mid < *it) {
             left = mid + 1;
           } else {
@@ -144,8 +151,8 @@ private:
         it -= 2;
       }
 
-      current_it += group * 2; // Multiply by 2 for pairs
-      current_pend += group;
+      current_it += dist * 2; // Multiply by 2 for pairs
+      current_pend += dist;
     }
     while (current_pend != pend.end()) {
       current_it += 2;
@@ -153,6 +160,8 @@ private:
       typename chain_t::iterator right = *current_pend;
       while (left != right) {
         typename chain_t::iterator mid = left + (right - left) / 2;
+        debug << "- comparing " << **mid << " and " << *current_it
+              << ". compare " << ++compare_count_ << std::endl;
         if (**mid < *current_it) {
           left = mid + 1;
         } else {
@@ -169,11 +178,13 @@ private:
         cache;
     for (typename chain_t::iterator it = chain.begin(); it != chain.end();
          ++it) {
+      debug << **it << " ";
       for (typename RandomAccessIterator::difference_type i = 0; i < it->Size();
            ++i) {
         cache.push_back(*(it->Base() + i));
       }
     }
+    debug << std::endl;
     std::copy(cache.begin(), cache.end(), first.Base());
   }
 };
