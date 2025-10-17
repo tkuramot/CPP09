@@ -1,192 +1,228 @@
-#ifndef PMERGE_ME_HPP
-#define PMERGE_ME_HPP
+#ifndef PMERGEME_HPP
+#define PMERGEME_HPP
 
-#include "GroupIterator.hpp"
-#include <algorithm>
+#include <vector>
 #include <deque>
-#include <iomanip>
+#include <list>
+#include <string>
+#include <iterator>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <cstdlib>
+#include <sys/time.h>
 
-#define VERBOSE 1
+// Helper: get iterator traits for C++98
+template<typename Iterator>
+struct iterator_traits {
+	typedef typename std::iterator_traits<Iterator>::iterator_category iterator_category;
+	typedef typename std::iterator_traits<Iterator>::value_type value_type;
+	typedef typename std::iterator_traits<Iterator>::difference_type difference_type;
+	typedef typename std::iterator_traits<Iterator>::pointer pointer;
+	typedef typename std::iterator_traits<Iterator>::reference reference;
+};
 
-#ifdef VERBOSE
-#define debug std::cerr
-#else
-#define debug                                                                  \
-  if (false)                                                                   \
-  std::cerr
-#endif
+// group_iterator: groups elements for Ford-Johnson algorithm
+template<typename Iterator>
+class group_iterator {
+public:
+	typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
+	typedef Iterator iterator_type;
+	typedef typename iterator_traits<Iterator>::value_type value_type;
+	typedef typename iterator_traits<Iterator>::difference_type difference_type;
+	typedef typename iterator_traits<Iterator>::pointer pointer;
+	typedef typename iterator_traits<Iterator>::reference reference;
 
-size_t compare_count_;
+	// Constructors
+	group_iterator() : _it(), _size(0) {}
+	group_iterator(Iterator it, difference_type size) : _it(it), _size(size) {}
+
+	// Access
+	iterator_type base() const { return _it; }
+	difference_type size() const { return _size; }
+
+	// Element access - returns last element of the group
+	reference operator*() const {
+		Iterator tmp = _it;
+		std::advance(tmp, _size - 1);
+		return *tmp;
+	}
+
+	pointer operator->() const {
+		return &(operator*());
+	}
+
+	// Increment/decrement
+	group_iterator& operator++() {
+		std::advance(_it, _size);
+		return *this;
+	}
+
+	group_iterator operator++(int) {
+		group_iterator tmp = *this;
+		++(*this);
+		return tmp;
+	}
+
+	group_iterator& operator--() {
+		std::advance(_it, -_size);
+		return *this;
+	}
+
+	group_iterator operator--(int) {
+		group_iterator tmp = *this;
+		--(*this);
+		return tmp;
+	}
+
+	group_iterator& operator+=(difference_type n) {
+		_it += _size * n;
+		return *this;
+	}
+
+	group_iterator& operator-=(difference_type n) {
+		_it -= _size * n;
+		return *this;
+	}
+
+	// Comparison operators
+	friend bool operator==(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() == rhs.base();
+	}
+
+	friend bool operator!=(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() != rhs.base();
+	}
+
+	friend bool operator<(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() < rhs.base();
+	}
+
+	friend bool operator<=(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() <= rhs.base();
+	}
+
+	friend bool operator>(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() > rhs.base();
+	}
+
+	friend bool operator>=(const group_iterator& lhs, const group_iterator& rhs) {
+		return lhs.base() >= rhs.base();
+	}
+
+	// Arithmetic operators
+	friend group_iterator operator+(group_iterator it, difference_type n) {
+		it += n;
+		return it;
+	}
+
+	friend group_iterator operator+(difference_type n, group_iterator it) {
+		it += n;
+		return it;
+	}
+
+	friend group_iterator operator-(group_iterator it, difference_type n) {
+		it -= n;
+		return it;
+	}
+
+	friend difference_type operator-(const group_iterator& lhs, const group_iterator& rhs) {
+		return (lhs.base() - rhs.base()) / lhs.size();
+	}
+
+private:
+	Iterator _it;
+	difference_type _size;
+};
+
+// iter_swap for group_iterator
+template<typename Iterator>
+void iter_swap(group_iterator<Iterator> lhs, group_iterator<Iterator> rhs) {
+	Iterator lhs_begin = lhs.base();
+	Iterator lhs_end = lhs.base();
+	std::advance(lhs_end, lhs.size());
+	Iterator rhs_begin = rhs.base();
+
+	std::swap_ranges(lhs_begin, lhs_end, rhs_begin);
+}
+
+// Helper: conditional swap
+template<typename Iterator>
+void iter_swap_if(Iterator a, Iterator b) {
+	if (*b < *a) {
+		std::iter_swap(a, b);
+	}
+}
+
+template<typename Iterator>
+void iter_swap_if(group_iterator<Iterator> a, group_iterator<Iterator> b) {
+	if (*b < *a) {
+		iter_swap(a, b);
+	}
+}
+
+// Helper: custom upper_bound for list of group_iterators
+// Compares value with dereferenced elements in the list
+template<typename ListIter, typename GroupIter>
+ListIter custom_upper_bound(ListIter first, ListIter last, const GroupIter& value_iter) {
+	ListIter it;
+	typename std::iterator_traits<ListIter>::difference_type count, step;
+	count = std::distance(first, last);
+
+	while (count > 0) {
+		it = first;
+		step = count / 2;
+		std::advance(it, step);
+
+		// Compare dereferenced values
+		if (!(*value_iter < **it)) {
+			first = ++it;
+			count -= step + 1;
+		} else {
+			count = step;
+		}
+	}
+	return first;
+}
 
 class PMergeMe {
 public:
-  template <typename T> static void Sort(std::vector<T> &v) {
-    SortImpl<std::vector, typename std::vector<T>::iterator>(
-        GroupIterator<typename std::vector<T>::iterator>(v.begin(), 1),
-        GroupIterator<typename std::vector<T>::iterator>(v.end(), 1));
-  }
-  template <typename T> static void Sort(std::deque<T> &d) {
-    SortImpl<std::vector, typename std::deque<T>::iterator>(
-        GroupIterator<typename std::deque<T>::iterator>(d.begin(), 1),
-        GroupIterator<typename std::deque<T>::iterator>(d.end(), 1));
-  }
+	PMergeMe(int argc, char **argv);
+	~PMergeMe();
+
+	void sortAndDisplay();
 
 private:
-  template <template <typename, typename> class Container,
-            typename RandomAccessIterator>
-  static void SortImpl(GroupIterator<RandomAccessIterator> first,
-                       GroupIterator<RandomAccessIterator> last) {
-    debug << "===" << std::endl;
-    debug << "input: ";
-    GroupIterator<RandomAccessIterator>::DebugPrint(first, last);
-    typename GroupIterator<RandomAccessIterator>::difference_type size =
-        last - first;
-    if (size < 2) {
-      return;
-    }
+	std::vector<int> _vec;
+	std::deque<int> _deq;
+	std::vector<int> _original;
 
-    bool has_stray = (size % 2);
-    GroupIterator<RandomAccessIterator> end = has_stray ? last - 1 : last;
+	// Parsing
+	void parseArguments(int argc, char **argv);
+	int parsePositiveInt(const std::string& str);
 
-    // Sort in pairs
-    debug << "pairing numbers and sorting in pairs..." << std::endl;
-    for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      debug << "- comparing " << *it << " and " << *(it + 1) << ". compare "
-            << ++compare_count_ << std::endl;
-      if (*it < *(it + 1)) {
-        continue;
-      }
-      GroupIterator<RandomAccessIterator>::Swap(it, it + 1);
-    }
+	// Ford-Johnson sort for vector
+	void mergeInsertionSortVector(std::vector<int>::iterator first,
+	                               std::vector<int>::iterator last);
+	void mergeInsertionSortVectorImpl(group_iterator<std::vector<int>::iterator> first,
+	                                   group_iterator<std::vector<int>::iterator> last);
 
-    std::stringstream lb, sb;
-    for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      lb << std::setw(2) << *(it + 1) << " ";
-      sb << std::setw(2) << *it << " ";
-    }
-    if (has_stray) {
-      sb << std::setw(2) << *(last - 1) << " ";
-    }
-    debug << "large: " << lb.str() << std::endl;
-    debug << "small: " << sb.str() << std::endl;
+	// Ford-Johnson sort for deque
+	void mergeInsertionSortDeque(std::deque<int>::iterator first,
+	                              std::deque<int>::iterator last);
+	void mergeInsertionSortDequeImpl(group_iterator<std::deque<int>::iterator> first,
+	                                  group_iterator<std::deque<int>::iterator> last);
 
-    // Recursively sort the pairs
-    SortImpl<Container>(GroupIterator<RandomAccessIterator>(first, 2),
-                        GroupIterator<RandomAccessIterator>(end, 2));
+	// Display
+	void displaySequence(const std::string& prefix, const std::vector<int>& container);
+	void displayTime(const std::string& containerName, size_t size, double microseconds);
 
-    // Separate the sorted pairs into chain and pend
-    typedef Container<GroupIterator<RandomAccessIterator>,
-                      std::allocator<GroupIterator<RandomAccessIterator> > >
-        chain_t;
-    chain_t chain;
-    chain.reserve(size);
-    debug << "===" << std::endl;
-    debug << "returning from recursion..." << std::endl;
-    std::stringstream la, sa;
-    for (GroupIterator<RandomAccessIterator> it = first; it != end; it += 2) {
-      la << std::setw(2) << *(it + 1) << " ";
-      sa << std::setw(2) << *it << " ";
-    }
-    if (has_stray) {
-      sa << std::setw(2) << *(last - 1) << " ";
-    }
-    debug << "large: " << la.str() << std::endl;
-    debug << "small: " << sa.str() << std::endl;
-    debug << "separating numbers into chain and pend..." << std::endl;
-    debug << "inserting first pend element into chain" << std::endl;
-    chain.push_back(first);
-    chain.push_back(first + 1);
-    typedef Container<typename chain_t::iterator,
-                      std::allocator<typename chain_t::iterator> >
-        pend_t;
-    pend_t pend;
-    pend.reserve(size / 2 - 1);
-    for (GroupIterator<RandomAccessIterator> it = first + 2; it != end;
-         it += 2) {
-      typename chain_t::iterator tmp = chain.insert(chain.end(), it + 1);
-      pend.emplace_back(tmp);
-    }
-    if (has_stray) {
-      pend.emplace_back(chain.end());
-    }
+	// Timing
+	double getTimeDifference(struct timeval start, struct timeval end);
 
-    // Insert the pend into the chain
-    GroupIterator<RandomAccessIterator> current_it = first;
-    typename pend_t::iterator current_pend = pend.begin();
-    for (typename chain_t::difference_type pow2 = 1, jn = 0, dist = 2;
-         dist <= pend.end() - current_pend;
-         pow2 *= 2, jn = pow2 - jn, dist = 2 * jn) {
-      GroupIterator<RandomAccessIterator> it =
-          current_it + dist * 2; // Multiply by 2 for pairs
-      typename pend_t::iterator pend_it = current_pend + dist;
-      while (true) {
-        --pend_it;
-
-        typename chain_t::iterator left = chain.begin();
-        typename chain_t::iterator right = *pend_it;
-        debug << "binary search for " << *it << " in " << right - left
-              << " elements" << std::endl;
-        debug << "===============" << chain.size() << std::endl;
-        for (typename chain_t::iterator it = left; it != right; ++it) {
-          debug << **it << " ";
-        }
-        debug << std::endl << "===============" << std::endl;
-        while (left != right) {
-          typename chain_t::iterator mid = left + (right - left) / 2;
-          debug << "- comparing " << **mid << " and " << *it << ". compare "
-                << ++compare_count_ << std::endl;
-          if (**mid < *it) {
-            left = mid + 1;
-          } else {
-            right = mid;
-          }
-        }
-        chain.insert(left, it);
-
-        if (pend_it == current_pend) {
-          break;
-        }
-        it -= 2;
-      }
-
-      current_it += dist * 2; // Multiply by 2 for pairs
-      current_pend += dist;
-    }
-    while (current_pend != pend.end()) {
-      current_it += 2;
-      typename chain_t::iterator left = chain.begin();
-      typename chain_t::iterator right = *current_pend;
-      while (left != right) {
-        typename chain_t::iterator mid = left + (right - left) / 2;
-        debug << "- comparing " << **mid << " and " << *current_it
-              << ". compare " << ++compare_count_ << std::endl;
-        if (**mid < *current_it) {
-          left = mid + 1;
-        } else {
-          right = mid;
-        }
-      }
-      chain.insert(left, current_it);
-
-      ++current_pend;
-    }
-
-    Container<typename RandomAccessIterator::value_type,
-              std::allocator<typename RandomAccessIterator::value_type> >
-        cache;
-    for (typename chain_t::iterator it = chain.begin(); it != chain.end();
-         ++it) {
-      debug << **it << " ";
-      for (typename RandomAccessIterator::difference_type i = 0; i < it->Size();
-           ++i) {
-        cache.push_back(*(it->Base() + i));
-      }
-    }
-    debug << std::endl;
-    std::copy(cache.begin(), cache.end(), first.Base());
-  }
+	// No copy
+	PMergeMe(const PMergeMe&);
+	PMergeMe& operator=(const PMergeMe&);
 };
 
-#endif // PMERGE_ME_HPP
+#endif

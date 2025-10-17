@@ -14,6 +14,10 @@ DEPENDS		:= $(OBJS:.o=.d)
 .PHONY: all
 all: $(NAME)
 
+.PHONY: run
+run: all
+	./$(NAME)
+
 $(NAME): $(OBJS)
 	$(CXX) -o $@ $^ $(INCLUDE) $(CXXFLAGS)
 
