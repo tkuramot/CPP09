@@ -91,6 +91,15 @@ int main(int argc, char **argv) {
 		gettimeofday(&end_deq, NULL);
 		double time_deq = getTimeDifference(start_deq, end_deq);
 
+		if (vec.size() != deq.size()) {
+			throw std::runtime_error("Error: vector and deque have different sizes after sorting");
+		}
+		for (size_t i = 0; i < vec.size(); ++i) {
+			if (vec[i] != deq[i]) {
+				throw std::runtime_error("Error: vector and deque have different sorted results");
+			}
+		}
+
 		displaySequence("After:  ", vec);
 		displayTime("std::vector", vec.size(), time_vec);
 		displayTime("std::deque", deq.size(), time_deq);
