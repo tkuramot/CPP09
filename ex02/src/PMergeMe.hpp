@@ -207,7 +207,6 @@ private:
 
   PMergeMe();
   PMergeMe(const PMergeMe &);
-  PMergeMe &operator=(const PMergeMe &);
 };
 
 #endif
