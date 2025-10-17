@@ -26,6 +26,19 @@ private:
 
     GroupIterator() : it_(), size_(0) {}
     GroupIterator(Iterator it, difference_type size) : it_(it), size_(size) {}
+    GroupIterator(const GroupIterator &other)
+        : it_(other.it_), size_(other.size_) {}
+    GroupIterator &operator=(const GroupIterator &other)
+    {
+      if (this == &other)
+      {
+        return *this;
+      }
+      it_ = other.it_;
+      size_ = other.size_;
+      return *this;
+    }
+    ~GroupIterator() {}
 
     iterator_type base() const { return it_; }
     difference_type size() const { return size_; }
@@ -184,6 +197,8 @@ private:
 
   PMergeMe();
   PMergeMe(const PMergeMe &);
+  PMergeMe &operator=(const PMergeMe &);
+  ~PMergeMe();
 };
 
 #endif
