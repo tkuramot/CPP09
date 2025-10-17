@@ -1,9 +1,5 @@
 #include "PMergeMe.hpp"
 
-// ============================================================================
-// Ford-Johnson Algorithm for std::vector
-// ============================================================================
-
 void PMergeMe::sort(std::vector<int>::iterator first,
                     std::vector<int>::iterator last) {
 	std::vector<int>::difference_type size = std::distance(first, last);
@@ -12,36 +8,33 @@ void PMergeMe::sort(std::vector<int>::iterator first,
 	}
 
 	sortImpl(
-		group_iterator<std::vector<int>::iterator>(first, 1),
-		group_iterator<std::vector<int>::iterator>(last, 1)
+		GroupIterator<std::vector<int>::iterator>(first, 1),
+		GroupIterator<std::vector<int>::iterator>(last, 1)
 	);
 }
 
 void PMergeMe::sortImpl(
-	group_iterator<std::vector<int>::iterator> first,
-	group_iterator<std::vector<int>::iterator> last) {
+	GroupIterator<std::vector<int>::iterator> first,
+	GroupIterator<std::vector<int>::iterator> last) {
 
-	typedef group_iterator<std::vector<int>::iterator> group_iter;
+	typedef GroupIterator<std::vector<int>::iterator> group_iter;
 	typedef std::vector<int>::difference_type diff_t;
 
 	diff_t size = last - first;
 	if (size < 2) return;
 
-	// Step 1: Pair and swap
 	bool has_stray = (size % 2 != 0);
 	group_iter end = has_stray ? last - 1 : last;
 
 	for (group_iter it = first; it != end; it += 2) {
-		iter_swap_if(it, it + 1);
+		iterSwapIf(it, it + 1);
 	}
 
-	// Step 2: Recursively sort pairs by max
 	sortImpl(
 		group_iter(first.base(), 2 * first.size()),
 		group_iter(end.base(), 2 * end.size())
 	);
 
-	// Step 3: Separate main chain and pend
 	std::list<group_iter> chain;
 	chain.push_back(first);
 	chain.push_back(first + 1);
@@ -57,7 +50,6 @@ void PMergeMe::sortImpl(
 		pend.push_back(chain.end());
 	}
 
-	// Step 4: Insert pend elements using Jacobsthal sequence
 	group_iter current_it = first;
 	std::vector<std::list<group_iter>::iterator>::iterator current_pend = pend.begin();
 
@@ -72,7 +64,7 @@ void PMergeMe::sortImpl(
 			--pe;
 
 			std::list<group_iter>::iterator insertion_point =
-				custom_upper_bound(chain.begin(), *pe, it);
+				customUpperBound(chain.begin(), *pe, it);
 			chain.insert(insertion_point, it);
 
 			if (pe == current_pend) break;
@@ -83,16 +75,14 @@ void PMergeMe::sortImpl(
 		current_pend += dist;
 	}
 
-	// Step 5: Insert remaining pend elements
 	while (current_pend != pend.end()) {
 		current_it += 2;
 		std::list<group_iter>::iterator insertion_point =
-			custom_upper_bound(chain.begin(), *current_pend, current_it);
+			customUpperBound(chain.begin(), *current_pend, current_it);
 		chain.insert(insertion_point, current_it);
 		++current_pend;
 	}
 
-	// Step 6: Move sorted elements to cache then back
 	std::vector<int> cache;
 	cache.reserve(size * first.size());
 
@@ -106,10 +96,6 @@ void PMergeMe::sortImpl(
 	std::copy(cache.begin(), cache.end(), first.base());
 }
 
-// ============================================================================
-// Ford-Johnson Algorithm for std::deque
-// ============================================================================
-
 void PMergeMe::sort(std::deque<int>::iterator first,
                     std::deque<int>::iterator last) {
 	std::deque<int>::difference_type size = std::distance(first, last);
@@ -118,36 +104,33 @@ void PMergeMe::sort(std::deque<int>::iterator first,
 	}
 
 	sortImpl(
-		group_iterator<std::deque<int>::iterator>(first, 1),
-		group_iterator<std::deque<int>::iterator>(last, 1)
+		GroupIterator<std::deque<int>::iterator>(first, 1),
+		GroupIterator<std::deque<int>::iterator>(last, 1)
 	);
 }
 
 void PMergeMe::sortImpl(
-	group_iterator<std::deque<int>::iterator> first,
-	group_iterator<std::deque<int>::iterator> last) {
+	GroupIterator<std::deque<int>::iterator> first,
+	GroupIterator<std::deque<int>::iterator> last) {
 
-	typedef group_iterator<std::deque<int>::iterator> group_iter;
+	typedef GroupIterator<std::deque<int>::iterator> group_iter;
 	typedef std::deque<int>::difference_type diff_t;
 
 	diff_t size = last - first;
 	if (size < 2) return;
 
-	// Step 1: Pair and swap
 	bool has_stray = (size % 2 != 0);
 	group_iter end = has_stray ? last - 1 : last;
 
 	for (group_iter it = first; it != end; it += 2) {
-		iter_swap_if(it, it + 1);
+		iterSwapIf(it, it + 1);
 	}
 
-	// Step 2: Recursively sort pairs by max
 	sortImpl(
 		group_iter(first.base(), 2 * first.size()),
 		group_iter(end.base(), 2 * end.size())
 	);
 
-	// Step 3: Separate main chain and pend
 	std::list<group_iter> chain;
 	chain.push_back(first);
 	chain.push_back(first + 1);
@@ -163,7 +146,6 @@ void PMergeMe::sortImpl(
 		pend.push_back(chain.end());
 	}
 
-	// Step 4: Insert pend elements using Jacobsthal sequence
 	group_iter current_it = first;
 	std::vector<std::list<group_iter>::iterator>::iterator current_pend = pend.begin();
 
@@ -178,7 +160,7 @@ void PMergeMe::sortImpl(
 			--pe;
 
 			std::list<group_iter>::iterator insertion_point =
-				custom_upper_bound(chain.begin(), *pe, it);
+				customUpperBound(chain.begin(), *pe, it);
 			chain.insert(insertion_point, it);
 
 			if (pe == current_pend) break;
@@ -189,16 +171,14 @@ void PMergeMe::sortImpl(
 		current_pend += dist;
 	}
 
-	// Step 5: Insert remaining pend elements
 	while (current_pend != pend.end()) {
 		current_it += 2;
 		std::list<group_iter>::iterator insertion_point =
-			custom_upper_bound(chain.begin(), *current_pend, current_it);
+			customUpperBound(chain.begin(), *current_pend, current_it);
 		chain.insert(insertion_point, current_it);
 		++current_pend;
 	}
 
-	// Step 6: Move sorted elements to cache then back
 	std::deque<int> cache;
 
 	for (std::list<group_iter>::iterator it = chain.begin(); it != chain.end(); ++it) {

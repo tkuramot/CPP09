@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <sys/time.h>
 
-// Parse a positive integer from string
 static int parsePositiveInt(const std::string& str) {
 	if (str.empty()) {
 		throw std::runtime_error("Error");
@@ -29,7 +28,6 @@ static int parsePositiveInt(const std::string& str) {
 	return static_cast<int>(num);
 }
 
-// Parse arguments and fill containers
 static void parseArguments(int argc, char **argv,
                            std::vector<int>& vec,
                            std::deque<int>& deq) {
@@ -44,7 +42,6 @@ static void parseArguments(int argc, char **argv,
 	}
 }
 
-// Display a sequence
 static void displaySequence(const std::string& prefix, const std::vector<int>& container) {
 	std::cout << prefix;
 
@@ -60,7 +57,6 @@ static void displaySequence(const std::string& prefix, const std::vector<int>& c
 	std::cout << std::endl;
 }
 
-// Display timing information
 static void displayTime(const std::string& containerName, size_t size, double microseconds) {
 	std::cout << "Time to process a range of " << size
 	          << " elements with " << containerName << " : "
@@ -68,7 +64,6 @@ static void displayTime(const std::string& containerName, size_t size, double mi
 	          << std::endl;
 }
 
-// Calculate time difference in microseconds
 static double getTimeDifference(struct timeval start, struct timeval end) {
 	return (end.tv_sec - start.tv_sec) * 1000000.0 + (end.tv_usec - start.tv_usec);
 }
@@ -78,30 +73,24 @@ int main(int argc, char **argv) {
 		std::vector<int> vec;
 		std::deque<int> deq;
 
-		// Parse arguments
 		parseArguments(argc, argv, vec, deq);
 
-		// Save original for display
 		std::vector<int> original = vec;
 
-		// Display before
 		displaySequence("Before: ", original);
 
-		// Sort vector and measure time
 		struct timeval start_vec, end_vec;
 		gettimeofday(&start_vec, NULL);
 		PMergeMe::sort(vec.begin(), vec.end());
 		gettimeofday(&end_vec, NULL);
 		double time_vec = getTimeDifference(start_vec, end_vec);
 
-		// Sort deque and measure time
 		struct timeval start_deq, end_deq;
 		gettimeofday(&start_deq, NULL);
 		PMergeMe::sort(deq.begin(), deq.end());
 		gettimeofday(&end_deq, NULL);
 		double time_deq = getTimeDifference(start_deq, end_deq);
 
-		// Display results
 		displaySequence("After:  ", vec);
 		displayTime("std::vector", vec.size(), time_vec);
 		displayTime("std::deque", deq.size(), time_deq);
