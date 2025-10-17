@@ -1,113 +1,23 @@
 #include "PMergeMe.hpp"
-#include <stdexcept>
-#include <limits>
-#include <iomanip>
-
-PMergeMe::PMergeMe(int argc, char **argv) {
-	parseArguments(argc, argv);
-}
-
-PMergeMe::~PMergeMe() {}
-
-void PMergeMe::parseArguments(int argc, char **argv) {
-	if (argc < 2) {
-		throw std::runtime_error("Error: No arguments provided");
-	}
-
-	for (int i = 1; i < argc; ++i) {
-		int num = parsePositiveInt(argv[i]);
-		_original.push_back(num);
-		_vec.push_back(num);
-		_deq.push_back(num);
-	}
-}
-
-int PMergeMe::parsePositiveInt(const std::string& str) {
-	if (str.empty()) {
-		throw std::runtime_error("Error");
-	}
-
-	for (size_t i = 0; i < str.length(); ++i) {
-		if (!std::isdigit(str[i])) {
-			throw std::runtime_error("Error");
-		}
-	}
-
-	std::istringstream iss(str);
-	long num;
-	iss >> num;
-
-	if (iss.fail() || num < 0 || num > std::numeric_limits<int>::max()) {
-		throw std::runtime_error("Error");
-	}
-
-	return static_cast<int>(num);
-}
-
-void PMergeMe::displaySequence(const std::string& prefix, const std::vector<int>& container) {
-	std::cout << prefix;
-
-	size_t size = container.size();
-
-	for (size_t i = 0; i < size; ++i) {
-		std::cout << container[i];
-		if (i + 1 < size) {
-			std::cout << " ";
-		}
-	}
-
-	std::cout << std::endl;
-}
-
-void PMergeMe::displayTime(const std::string& containerName, size_t size, double microseconds) {
-	std::cout << "Time to process a range of " << size
-	          << " elements with " << containerName << " : "
-	          << std::fixed << std::setprecision(5) << microseconds << " us"
-	          << std::endl;
-}
-
-double PMergeMe::getTimeDifference(struct timeval start, struct timeval end) {
-	return (end.tv_sec - start.tv_sec) * 1000000.0 + (end.tv_usec - start.tv_usec);
-}
-
-void PMergeMe::sortAndDisplay() {
-	displaySequence("Before: ", _original);
-
-	struct timeval start_vec, end_vec;
-	gettimeofday(&start_vec, NULL);
-	mergeInsertionSortVector(_vec.begin(), _vec.end());
-	gettimeofday(&end_vec, NULL);
-	double time_vec = getTimeDifference(start_vec, end_vec);
-
-	struct timeval start_deq, end_deq;
-	gettimeofday(&start_deq, NULL);
-	mergeInsertionSortDeque(_deq.begin(), _deq.end());
-	gettimeofday(&end_deq, NULL);
-	double time_deq = getTimeDifference(start_deq, end_deq);
-
-	displaySequence("After:  ", _vec);
-	displayTime("std::vector", _vec.size(), time_vec);
-	displayTime("std::deque", _deq.size(), time_deq);
-}
 
 // ============================================================================
 // Ford-Johnson Algorithm for std::vector
 // ============================================================================
 
-void PMergeMe::mergeInsertionSortVector(std::vector<int>::iterator first,
-                                         std::vector<int>::iterator last) {
+void PMergeMe::sort(std::vector<int>::iterator first,
+                    std::vector<int>::iterator last) {
 	std::vector<int>::difference_type size = std::distance(first, last);
 	if (size < 2) {
 		return;
 	}
 
-	mergeInsertionSortVectorImpl(
+	sortImpl(
 		group_iterator<std::vector<int>::iterator>(first, 1),
 		group_iterator<std::vector<int>::iterator>(last, 1)
 	);
 }
 
-void PMergeMe::mergeInsertionSortVectorImpl(
+void PMergeMe::sortImpl(
 	group_iterator<std::vector<int>::iterator> first,
 	group_iterator<std::vector<int>::iterator> last) {
 
@@ -126,7 +36,7 @@ void PMergeMe::mergeInsertionSortVectorImpl(
 	}
 
 	// Step 2: Recursively sort pairs by max
-	mergeInsertionSortVectorImpl(
+	sortImpl(
 		group_iter(first.base(), 2 * first.size()),
 		group_iter(end.base(), 2 * end.size())
 	);
@@ -200,20 +110,20 @@ void PMergeMe::mergeInsertionSortVectorImpl(
 // Ford-Johnson Algorithm for std::deque
 // ============================================================================
 
-void PMergeMe::mergeInsertionSortDeque(std::deque<int>::iterator first,
-                                        std::deque<int>::iterator last) {
+void PMergeMe::sort(std::deque<int>::iterator first,
+                    std::deque<int>::iterator last) {
 	std::deque<int>::difference_type size = std::distance(first, last);
 	if (size < 2) {
 		return;
 	}
 
-	mergeInsertionSortDequeImpl(
+	sortImpl(
 		group_iterator<std::deque<int>::iterator>(first, 1),
 		group_iterator<std::deque<int>::iterator>(last, 1)
 	);
 }
 
-void PMergeMe::mergeInsertionSortDequeImpl(
+void PMergeMe::sortImpl(
 	group_iterator<std::deque<int>::iterator> first,
 	group_iterator<std::deque<int>::iterator> last) {
 
@@ -232,7 +142,7 @@ void PMergeMe::mergeInsertionSortDequeImpl(
 	}
 
 	// Step 2: Recursively sort pairs by max
-	mergeInsertionSortDequeImpl(
+	sortImpl(
 		group_iter(first.base(), 2 * first.size()),
 		group_iter(end.base(), 2 * end.size())
 	);
