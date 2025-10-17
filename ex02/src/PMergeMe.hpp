@@ -4,13 +4,7 @@
 #include <vector>
 #include <deque>
 #include <list>
-#include <string>
-#include <iterator>
-#include <iostream>
-#include <sstream>
 #include <algorithm>
-#include <cstdlib>
-#include <sys/time.h>
 
 class PMergeMe
 {
@@ -26,9 +20,7 @@ private:
   class GroupIterator
   {
   public:
-    typedef typename std::iterator_traits<Iterator>::iterator_category iterator_category;
     typedef Iterator iterator_type;
-    typedef typename std::iterator_traits<Iterator>::value_type value_type;
     typedef typename std::iterator_traits<Iterator>::difference_type difference_type;
     typedef typename std::iterator_traits<Iterator>::pointer pointer;
     typedef typename std::iterator_traits<Iterator>::reference reference;
@@ -57,24 +49,10 @@ private:
       return *this;
     }
 
-    GroupIterator operator++(int)
-    {
-      GroupIterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
     GroupIterator &operator--()
     {
       std::advance(_it, -_size);
       return *this;
-    }
-
-    GroupIterator operator--(int)
-    {
-      GroupIterator tmp = *this;
-      --(*this);
-      return tmp;
     }
 
     GroupIterator &operator+=(difference_type n)
