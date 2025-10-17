@@ -25,16 +25,16 @@ private:
     typedef typename std::iterator_traits<Iterator>::pointer pointer;
     typedef typename std::iterator_traits<Iterator>::reference reference;
 
-    GroupIterator() : _it(), _size(0) {}
-    GroupIterator(Iterator it, difference_type size) : _it(it), _size(size) {}
+    GroupIterator() : it_(), size_(0) {}
+    GroupIterator(Iterator it, difference_type size) : it_(it), size_(size) {}
 
-    iterator_type base() const { return _it; }
-    difference_type size() const { return _size; }
+    iterator_type base() const { return it_; }
+    difference_type size() const { return size_; }
 
     reference operator*() const
     {
-      Iterator tmp = _it;
-      std::advance(tmp, _size - 1);
+      Iterator tmp = it_;
+      std::advance(tmp, size_ - 1);
       return *tmp;
     }
 
@@ -45,56 +45,56 @@ private:
 
     GroupIterator &operator++()
     {
-      std::advance(_it, _size);
+      std::advance(it_, size_);
       return *this;
     }
 
     GroupIterator &operator--()
     {
-      std::advance(_it, -_size);
+      std::advance(it_, -size_);
       return *this;
     }
 
     GroupIterator &operator+=(difference_type n)
     {
-      _it += _size * n;
+      it_ += size_ * n;
       return *this;
     }
 
     GroupIterator &operator-=(difference_type n)
     {
-      _it -= _size * n;
+      it_ -= size_ * n;
       return *this;
     }
 
     bool operator==(const GroupIterator &rhs) const
     {
-      return _it == rhs._it;
+      return it_ == rhs.it_;
     }
 
     bool operator!=(const GroupIterator &rhs) const
     {
-      return _it != rhs._it;
+      return it_ != rhs.it_;
     }
 
     bool operator<(const GroupIterator &rhs) const
     {
-      return _it < rhs._it;
+      return it_ < rhs.it_;
     }
 
     bool operator<=(const GroupIterator &rhs) const
     {
-      return _it <= rhs._it;
+      return it_ <= rhs.it_;
     }
 
     bool operator>(const GroupIterator &rhs) const
     {
-      return _it > rhs._it;
+      return it_ > rhs.it_;
     }
 
     bool operator>=(const GroupIterator &rhs) const
     {
-      return _it >= rhs._it;
+      return it_ >= rhs.it_;
     }
 
     GroupIterator operator+(difference_type n) const
@@ -113,12 +113,12 @@ private:
 
     difference_type operator-(const GroupIterator &rhs) const
     {
-      return (_it - rhs._it) / _size;
+      return (it_ - rhs.it_) / size_;
     }
 
   private:
-    Iterator _it;
-    difference_type _size;
+    Iterator it_;
+    difference_type size_;
   };
 
   template <typename Iterator>
@@ -151,7 +151,7 @@ private:
   }
 
   template <typename ListIter, typename GroupIter>
-  static ListIter customUpperBound(ListIter first, ListIter last, const GroupIter &value_iter)
+  static ListIter binarySearchInsertionPoint(ListIter first, ListIter last, const GroupIter &value_iter)
   {
     ListIter it;
     typename std::iterator_traits<ListIter>::difference_type count, step;
