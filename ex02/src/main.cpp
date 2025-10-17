@@ -10,14 +10,14 @@ static int parsePositiveInt(const std::string &str)
 {
   if (str.empty())
   {
-    throw std::runtime_error("Error");
+    throw std::runtime_error("Error: empty argument");
   }
 
   for (size_t i = 0; i < str.length(); ++i)
   {
     if (!std::isdigit(str[i]))
     {
-      throw std::runtime_error("Error");
+      throw std::runtime_error("Error: invalid character");
     }
   }
 
@@ -27,7 +27,7 @@ static int parsePositiveInt(const std::string &str)
 
   if (iss.fail() || num < 0 || num > std::numeric_limits<int>::max())
   {
-    throw std::runtime_error("Error");
+    throw std::runtime_error("Error: number out of range");
   }
 
   return static_cast<int>(num);
@@ -39,7 +39,7 @@ static void parseArguments(int argc, char **argv,
 {
   if (argc < 2)
   {
-    throw std::runtime_error("Error: No arguments provided");
+    throw std::runtime_error("Error: no arguments provided");
   }
 
   for (int i = 1; i < argc; ++i)
