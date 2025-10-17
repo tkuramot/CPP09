@@ -14,22 +14,12 @@ DEPENDS		:= $(OBJS:.o=.d)
 .PHONY: all
 all: $(NAME)
 
-.PHONY: run
-run: all
-	./$(NAME)
-
 $(NAME): $(OBJS)
 	$(CXX) -o $@ $^ $(INCLUDE) $(CXXFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@ mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $@ -c $<
-
-.PHONY: debug
-debug: $(NAME_DEBUG)
-
-$(NAME_DEBUG): $(OBJS_DEBUG)
-	$(CXX) -o $@ $^ $(INCLUDE) $(CXXFLAGS) $(DEBUG_FLAGS)
 
 $(OBJDIR)/%.o.debug: $(SRCDIR)/%.cpp
 	@ mkdir -p $(@D)
@@ -42,7 +32,6 @@ clean:
 .PHONY: fclean
 fclean: clean
 	$(RM) $(NAME)
-	$(RM) $(NAME_DEBUG)
 
 .PHONY: re
 re: fclean all
