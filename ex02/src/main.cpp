@@ -25,7 +25,7 @@ static int parsePositiveInt(const std::string &str)
   long num;
   iss >> num;
 
-  if (iss.fail() || num < 0 || num > std::numeric_limits<int>::max())
+  if (iss.fail() || num <= 0 || num > std::numeric_limits<int>::max())
   {
     throw std::runtime_error("Error: number out of range");
   }
