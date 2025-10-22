@@ -49,11 +49,11 @@ Result<std::pair<std::string, double>,
   if (to_double.IsErr()) {
     return Err("Error: not a double representation");
   }
-  if (to_double.IsOk() && to_double.Unwrap() < 0) {
+  if (to_double.IsOk() && (to_double.Unwrap() < 0)) {
     return Err("Error: not a positive number");
   }
   if (to_double.IsOk()
-      && static_cast<long int>(to_double.Unwrap()) > std::numeric_limits<int>::max()) {
+      && static_cast<long int>(to_double.Unwrap()) > 1000) {
     return Err("Error: too large a number");
   }
 
