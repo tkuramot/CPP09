@@ -61,8 +61,6 @@ Result<std::pair<std::string, double>,
 }
 
 void BitcoinExchange::SimulateExchange(const std::string &input_filename) {
-  const std::string kKeyValueDelimiter = " | ";
-
   std::ifstream input_file(input_filename.c_str());
   if (!input_file.is_open()) {
     std::cerr << "Failed to open input_db file: " << input_filename << std::endl;
@@ -72,13 +70,23 @@ void BitcoinExchange::SimulateExchange(const std::string &input_filename) {
   std::string line;
   // discard header
   std::getline(input_file, line);
+  if (line != "date | value") {
+    EvaluateLine(line);
+  }
   // read the key-value pairs
   while (std::getline(input_file, line)) {
+    EvaluateLine(line);
+  }
+}
+
+void BitcoinExchange::EvaluateLine(std::string line) {
+  const std::string kKeyValueDelimiter = " | ";
+
     Result<std::pair<std::string, double>, std::string>
         key_value = ParseSimulationInput(line, kKeyValueDelimiter);
     if (key_value.IsErr()) {
       std::cerr << key_value.UnwrapErr() << std::endl;
-      continue;
+      return;
     }
 
     std::string date = key_value.Unwrap().first;
@@ -88,9 +96,8 @@ void BitcoinExchange::SimulateExchange(const std::string &input_filename) {
     Result<double, std::string> exchange_rate = StringToDouble(exchange_rate_str);
     if (exchange_rate.IsErr()) {
       std::cerr << "Error: exchange rate database is corrupted" << std::endl;
-      continue;
+      return;
     }
 
     std::cout << date << " => " << value << " = " << value * exchange_rate.Unwrap() << std::endl;
-  }
 }

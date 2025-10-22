@@ -24,6 +24,7 @@ class BitcoinExchange {
 
   static Result<std::pair<std::string, double>, std::string> ParseSimulationInput(
       const std::string &line, const std::string &key_value_delimiter);
+  void EvaluateLine(std::string line);
 };
 
 #endif //BTC_SRC_BITCOINEXCHANGE_HPP_
